@@ -1,10 +1,22 @@
-import './App.css';
+import './homepage.css';
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
+import Main from "./components/Main";
+import Footer from "./components/Footer";
+import HomePage from './pages/HomePage';
 
 function App() {
   return (
-    <div>
-     My app
-    </div>
+    <>
+      <Header />
+      <Main>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+        </Routes>
+      </Main>
+      <Footer />
+    </>
   );
 }
 

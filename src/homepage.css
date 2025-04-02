@@ -1,21 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Markazi+Text:wght@400..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Karla:ital,wght@0,200..800;1,200..800&display=swap');
 
 /* General Resets */
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
+}
+
+h1, h2, h3 {
+  font-family: "Markazi Text", serif;
+}
+
+h1 {
+  font-size:3.33rem;
+}
+
+h2, h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+p {
+  font-family: "Karla", sans-serif;
+  font-size: 1rem;
+  max-width: 65ch;
   line-height: 1.5;
 }
 
 .container {
   max-width: 960px;
   margin: 0 auto;
-  padding: 0 2rem;
 }
 
 /* Header */
 header {
-  padding: 1rem 2rem;
   background-color: #fff;
+  padding: 1rem 1rem;
+  font-family: "Karla", sans-serif;
 }
 
 header .container {
@@ -39,53 +59,117 @@ header .container {
   color: #333;
 }
 
-/* Hero Section */
-.hero-section {
-  background-color: #495E57;
-  color: white;
-  padding: 2rem 2rem;
+.nav-list a:hover {
+  text-decoration: underline;
 }
 
+.nav-close {
+  display: none;
+}
+
+/* Hero Section */
+.about-section {
+  background-color: #495E57;
+  color: white;
+  padding: 2rem 1rem;
+  font-weight: 500;
+}
+
+.hero-section {
+  background-size: cover;
+  background-position: center;
+  height: 50vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  color: #fff;
+}
+
+.hero-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.50); /* darker overlay for more contrast */
+  z-index: 0;
+  border-radius: 0;
+}
+
+.about-section {
+  padding-top: 3rem;
+  padding-bottom: 1rem;
+}
+
+/* .hero-section {
+  max-height: 250px;
+} */
+
 .hero-layout {
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* .hero-layout, */
+.about-layout {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
 }
 
-.hero-text {
-  max-width: 500px;
-}
-
-.hero-text h1 {
-  font-size: 2rem;
+.hero-text h1,
+.about-text h1 {
   color: #F4CE14;
-  margin-bottom: -1rem;
-  margin-top: -0.5rem;
+  margin: -1rem 0 -1rem;
 }
 
-.hero-text h2 {
-  font-size: 1.5rem;
-  margin-bottom: -0.25rem;
+.hero-text h2,
+.about-text h2 {
+  margin-bottom: -0.5rem;
 }
 
-.hero-text p {
-  font-size: 1rem;
-  line-height: 1.4;
-  margin-bottom: 0.5rem;
+.hero-text p,
+.about-text p {
+  margin: 1rem 0 0.5rem;
+  max-width: 45ch;
+}
+
+.hero-layout h1,
+.hero-layout h2,
+.hero-layout p {
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 1);
 }
 
 .hero-image {
+  /* max-width: 400px;
+  border-radius: 16px;
+  align-self: flex-start;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3); */
+  display: none;
+}
+
+.about-image {
+  border-radius: 16px;
+  margin-bottom: 2rem;
   max-width: 350px;
-  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
 }
 
 .cta-button {
   background-color: #F4CE14;
   color: #333;
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem;
   border: none;
-  border-radius: 8px;
+  border-radius: 16px;
   font-weight: bold;
+  letter-spacing: 0.5px;
   cursor: pointer;
   margin-top: 1rem;
   transition: background 0.3s;
@@ -99,7 +183,8 @@ header .container {
 
 /* Specials Section */
 .specials-section {
-  padding: 2rem 2rem;
+  padding: 2rem 1rem;
+  margin-bottom: 1rem;
 }
 
 .specials-header {
@@ -117,7 +202,6 @@ header .container {
 
 .special-card {
   background-color: #EDEFEE;
-  border: 1px solid #eee;
   border-radius: 16px;
   transition: transform 0.3s;
 }
@@ -137,12 +221,28 @@ header .container {
   padding: 0 1rem;
 }
 
+.specials-card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline; /* aligns text better */
+  padding-right: 1rem;
+}
+
+.specials-card-title h3 {
+  margin: 1rem 0;
+}
+
+ .specials-card-title p {
+  margin: 0;
+  color: #EE9972;
+}
+
 /* Testimonials Section */
 .testimonials-section {
   background-color: #FBDABB;
-  padding: 2rem 2rem;
   text-align: center;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+  padding: 2rem 1rem 4rem;
 }
 
 .testimonials-section h2 {
@@ -158,69 +258,334 @@ header .container {
 
 .testimonial-card {
   background: #EE9972;
-  border-radius: 8px;
+  border-radius: 16px;
   box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
   width: 100%;
   transition: transform 0.3s;
+}
+
+.testimonial-cards h3 {
+  font-weight: bold;
+}
+
+.testimonial-card p {
+  padding: 0 1rem;
 }
 
 .testimonial-card:hover {
   transform: translateY(-5px);
 }
 
-/* About Section */
-.about-section {
-  padding: 3rem 2rem;
-  background-color: #495E57;
-  color: white;
-}
-
-.about-layout {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.about-text {
-  max-width: 500px;
-}
-
-.about-text h2 {
-  font-size: 2rem;
-  color: #F4CE14;
-  margin-bottom: -0.25rem;
-}
-
-.about-text h3 {
-  font-size: 1.5rem;
-  margin-bottom: -0.25rem;
-}
-
-.about-text p {
-  font-size: 1rem;
-  line-height: 1.4;
-  margin-bottom: 1.5rem;
-}
-
-.about-image {
-  max-width: 350px;
-  border-radius: 8px;
-}
-
 /* Footer */
 footer {
-  padding: 1rem 2rem;
+  padding: 1rem 1rem;
   background-color: #fff;
   color: #333;
-  font-size: 0.9rem;
+   font-size: 0.9rem; /*<<<<<------------------------ */
 }
 
 .footer-layout {
   display: flex;
   align-items: center;
+  text-align: center;
   justify-content: space-between;
 }
 
-footer img {
-  height: 100%;
+.footer-layout nav ul,
+.footer-layout section ul,
+.contact li {
+  padding: 0;
+  list-style: none;
 }
+
+.footer-layout section h3 {
+  margin-bottom: 0.5rem;
+}
+
+.footer-layout section li {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+.footer-layout a {
+  text-decoration: none;
+  color: #333;
+}
+
+footer img {
+  max-width: 120px;
+}
+
+.hamburger {
+  display: none;
+  font-size: 2.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #495E57;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+/* Utility class extracted from .hamburger styles for reuse */
+.icon-button {
+  font-size: 2.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #495E57;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+/* Tablets and small laptops */
+@media (max-width: 900px) {
+  header {
+    padding: 1rem;
+  }
+
+  .hamburger {
+    display: block;
+    order: 0;
+  }
+
+  .hamburger:hover {
+    transform: scale(1.1);
+    color: #495E57;
+  }
+
+  .logo {
+    order: 1;
+    margin: 0 auto;
+  }
+
+  .nav-list {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    height: 100vh;
+    width: 70%;
+    background-color: #EDEFEE;
+    padding: 1rem;
+    transition: left 0.3s ease-in-out;
+    overflow: hidden;
+    flex-direction: column;
+    display: flex;
+    opacity: 0;
+    border-radius: 8px;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.2);
+    gap: 1rem;
+    z-index: 1001;
+  }
+
+  .nav-list.show {
+    opacity: 1;
+    left: 0;
+  }
+
+  .nav-list a {
+    display: block;
+    padding: 0.75rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    color: #495E57;
+    transition: background 0.3s ease;
+  }
+
+  .nav-list a:hover {
+    text-decoration: underline;
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
+  }
+
+  .overlay.show {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .nav-close {
+    position: absolute;
+    display: block;
+    top: 1rem;
+    right: 1rem;
+    font-size: 2rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #495E57;
+    transition: transform 0.3s ease, color 0.3s ease;
+  }
+
+  .nav-close:hover {
+    transform: scale(1.1);
+    color: #495E57;
+  }
+
+  /* .hero-section {
+    max-height: 225px;
+  }
+
+  .hero-image,
+  .about-image {
+    max-width: 375px;
+  } */
+
+  .about-layout {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .about-image {
+    max-width: 100%;
+  }
+
+  .about-text {
+    margin-bottom: 1rem;
+  }
+
+  .specials-section {
+    margin-top: 2rem;
+  }
+
+  .specials-header {
+    flex-direction: row;
+  }
+
+  .specials-cards {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .special-card {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .special-card img {
+    max-width: 40%;
+    height: 200px;
+    border-radius: 16px 0 0 16px;
+  }
+
+  .footer-layout {
+    flex-direction: column;
+  }
+
+  .contact ul,
+  .socials ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 1rem;
+  }
+
+  .footer-layout img {
+    max-width: 60px;
+  }
+}
+
+/* Phones */
+/* @media (max-width: 635px) {
+  .hero-layout {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+  }
+
+  .about-layout {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }*/
+
+  /* .hero-image {
+    max-width: 325px;
+  } */
+
+ /* .about-image {
+    max-width: 100%;
+  }
+
+  .about-text {
+    margin-bottom: 1rem;
+  }
+
+   .hero-text p {
+    max-width: 25ch;
+  }
+}*/
+
+/* Phones */
+/* @media (max-width: 600px) {
+  .hero-image {
+    max-width: 250px;
+  }
+
+  .special-details {
+    max-width: 40ch;
+  }
+} */
+
+@media (max-width: 600px) {
+ .hero-image {
+    display: none;
+  }
+
+  .special-card {
+    height: 175px;
+  }
+
+  .special-card img {
+    height: 175px;
+  }
+
+}
+
+@media (max-width: 440px) {
+  .hero-image {
+     display: none;
+   }
+
+   /* COME BACK FOR THIS */
+   .cta-button {
+    width: 100%;
+    max-width: 250px;
+  }
+ 
+   .special-card {
+     height: 175px;
+   }
+ 
+   .special-card img {
+     height: 175px;
+   }
+ 
+   .special-details {
+     max-width: 25ch;
+     margin-bottom: 0.25rem;
+   }
+
+   .specials-card-title {
+    display:block;
+    justify-content: space-between;
+    align-items: baseline; /* aligns text better */
+    padding-right: 1rem;
+  }
+  
+  .specials-card-title h3 {
+    margin: 0rem 0;
+    margin-top: 1rem;
+  }
+ }
+
+
+

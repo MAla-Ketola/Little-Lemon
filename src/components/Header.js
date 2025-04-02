@@ -1,11 +1,13 @@
 import React from "react";
-import Nav from "./Nav"
+import Nav from "./Nav";
 
 function Header() {
     return (
         <header>
-            <img src="images/Logo .png" alt="Little Lemon Logo" />
-            <Nav/>
+            <div className="container">
+                <img src="images/Logo .png" alt="Little Lemon Logo" className="logo"/>
+                <Nav/>
+            </div>
         </header>
     )
 }
