@@ -1,4 +1,5 @@
 import React from "react";
+import { FaInstagram, FaFacebook, FaTiktok } from "react-icons/fa";
 
 function Footer() {
     return (
@@ -27,10 +28,10 @@ function Footer() {
 
                 <section className="socials">
                     <h3>Social Media</h3>
-                    <ul>
-                        <li><a href="#">Instagram</a></li>
-                        <li><a href="#">Facebook</a></li>
-                        <li><a href="#">TikTok</a></li>
+                    <ul className="social-icons">
+                        <li><a href="https://www.instagram.com" target="_blank" rel="noreferrer"><FaInstagram /></a></li>
+                        <li><a href="https://www.facebook.com" target="_blank" rel="noreferrer"><FaFacebook /></a></li>
+                        <li><a href="https://www.tiktok.com" target="_blank" rel="noreferrer"><FaTiktok /></a></li>
                     </ul>
                 </section>
             </div>

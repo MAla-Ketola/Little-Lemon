@@ -1,4 +1,5 @@
 import React from "react";
+import StarRating from "./starRating";
 
 function Testimonials() {
     return (
@@ -7,15 +8,33 @@ function Testimonials() {
                 <h2>Testimonials</h2>
                 <div className="testimonial-cards">
                     <div className="testimonial-card">
-                        <h3>Emma</h3>
+                        <div className="testimonial-card-header">
+                            <img src="images/emma.png" alt="avatar"/>
+                            <div>
+                                <StarRating rating={5}/>
+                                <h3>Emma</h3>
+                            </div>
+                        </div>
                         <p>Booking a table for my birthday was so easy...</p>
                     </div>
                     <div className="testimonial-card">
-                        <h3>Emma</h3>
+                    <div className="testimonial-card-header">
+                            <img src="images/emma.png" alt="avatar"/>
+                            <div>
+                                <StarRating rating={5}/>
+                                <h3>Emma</h3>
+                            </div>
+                        </div>
                         <p>Booking a table for my birthday was so easy...</p>
                     </div>
                     <div className="testimonial-card">
-                        <h3>Emma</h3>
+                    <div className="testimonial-card-header">
+                            <img src="images/emma.png" alt="avatar"/>
+                            <div>
+                                <StarRating rating={5}/>
+                                <h3>Emma</h3>
+                            </div>
+                        </div>
                         <p>Booking a table for my birthday was so easy...</p>
                     </div>
                 </div>

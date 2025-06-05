@@ -25,7 +25,7 @@ function Nav() {
                     <li><Link to="/" onClick={handleLinkClick}>Home</Link></li>
                     <li><Link to="/about" onClick={handleLinkClick}>About</Link></li>
                     <li><Link to="/menu" onClick={handleLinkClick}>Menu</Link></li>
-                    <li><Link to="/booking" onClick={handleLinkClick}>Reservations</Link></li>
+                    <li><Link to="/booking" onClick={handleLinkClick}>Book Now</Link></li>
                     <li><Link to="/order" onClick={handleLinkClick}>Order Online</Link></li>
                     <li><Link to="/login" onClick={handleLinkClick}>Login</Link></li>
                 </ul>
