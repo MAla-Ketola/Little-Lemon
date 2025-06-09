@@ -1,10 +1,13 @@
 import React from "react";
 import './bookingpage.css';
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import BookingForm from "./bookingForm";
 
-function BookingPage({availableTimes, dispatch}) {
+function BookingPage({availableTimes, dispatch, submitForm, bookings}) {
+
+  const location = useLocation();
+  const initialBooking = location.state || {};
 
     const fadeIn = {
         hidden: { opacity: 0, y: 30 },
@@ -53,6 +56,9 @@ function BookingPage({availableTimes, dispatch}) {
             <BookingForm
               availableTimes={availableTimes}
               dispatch={dispatch}
+              submitForm={submitForm}
+              bookings={bookings}
+              initialBooking={initialBooking}
             />
          </motion.div>
          </section>

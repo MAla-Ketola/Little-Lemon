@@ -1,44 +1,68 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import './bookingpage.css';
 
-function BookingForm({ availableTimes, dispatch }) {
+function BookingForm({ availableTimes, dispatch, submitForm, bookings, initialBooking = {} }) {
+  // Compute today's date string in YYYY-MM_DD format
+  const todayString = new Date().toISOString().split('T')[0];
+  const otherBookings = bookings.filter((b) => b.id !== initialBooking.id);
+
   // 1) Local state for all form fields except availableTimes
-  const [date, setDate] = useState('');
-  const [time, setTime] = useState('');
-  const [guests, setGuests] = useState('');
-  const [occasion, setOccasion] = useState('');
-  const [seating, setSeating] = useState('inside');
-  const [comments, setComments] = useState('');
+  const [date, setDate] = useState(initialBooking.date || todayString);
+  const [time, setTime] = useState(initialBooking.time || '');
+  const [guests, setGuests] = useState(initialBooking.guests || '');
+  const [occasion, setOccasion] = useState(initialBooking.occasion || '');
+  const [seating, setSeating] = useState(initialBooking.seating || 'inside');
+  const [comments, setComments] = useState(initialBooking.comments || '');
 
-  const navigate = useNavigate();
+    // Dispatch initial load of times for today's date
+  useEffect(() => {
+    dispatch({ type: 'UPDATE_TIMES', date: new Date(date), existingBookings: otherBookings });
+  }, []);
 
-  function handleSubmit(e) {
+    // on date-change:
+  const handleDateChange = (e) => {
+    const newDateString = e.target.value;
+    setDate(newDateString);
+
+    dispatch({
+      type: "UPDATE_TIMES",
+      date: new Date(newDateString),
+      existingBookings: otherBookings,
+    });
+  };
+
+const handleSubmit = (e) => {
     e.preventDefault();
-    const formData = { date, time, guests, occasion, seating, comments };
-    console.log('Submitting reservation data:', formData);
 
-    // In a real app, submit to an API endpoint here.
-    // Then navigate to a confirmation page, e.g.:
-    // navigate('/booking/contact/confirmation');
-  }
+    // include `id` so submitForm knows if it should update vs. add
+    const formData = {
+      id: initialBooking.id,
+      date,
+      time,
+      guests,
+      occasion,
+      seating,
+      comments,
+    };
+
+    const ok = submitForm(formData);
+    if (!ok) {
+      alert('Sorry, we couldn’t complete your booking. Please try again.');
+    }
+  };
 
   return (
     <form className="booking-form" onSubmit={handleSubmit}>
       <div className="booking-grid">
-        {/* --- Date field: dispatch UPDATE_TIMES when changed --- */}
+        {/* --- Date */}
         <div className="form-group">
           <label htmlFor="res-date">Date</label>
           <input
-            type="date"
+             type="date"
             id="res-date"
             name="res-date"
             value={date}
-            onChange={(e) => {
-              setDate(e.target.value);
-              // Dispatch an action to update availableTimes in Main
-              dispatch({ type: 'UPDATE_TIMES', date: e.target.value });
-            }}
+            onChange={handleDateChange}
             required
           />
         </div>
@@ -113,9 +137,9 @@ function BookingForm({ availableTimes, dispatch }) {
               type="radio"
               name="seating"
               value="inside"
-              checked={seating === 'inside'}
+              checked={seating === "inside"}
               onChange={(e) => setSeating(e.target.value)}
-            />{' '}
+            />{" "}
             Inside
           </label>
           <label>
@@ -123,9 +147,9 @@ function BookingForm({ availableTimes, dispatch }) {
               type="radio"
               name="seating"
               value="outside"
-              checked={seating === 'outside'}
+              checked={seating === "outside"}
               onChange={(e) => setSeating(e.target.value)}
-            />{' '}
+            />{" "}
             Outside
           </label>
         </div>
@@ -144,7 +168,8 @@ function BookingForm({ availableTimes, dispatch }) {
       </div>
 
       <p className="form-note">
-        You will receive a confirmation email shortly after booking. Please ensure your email is correct so we can send your reservation details.
+        You will receive a confirmation email shortly after booking. Please
+        ensure your email is correct so we can send your reservation details.
       </p>
 
       <div className="button-wrapper">

@@ -1,29 +1,49 @@
-// main.test.js
 import { initializeTimes, updateTimes } from './Main';
 
 describe('initializeTimes', () => {
-  test('returns the initial array of time slots', () => {
+  beforeAll(() => {
+    // Mock fetchAPI to return a predictable array
+    window.fetchAPI = jest.fn().mockReturnValue(['10:00', '11:00', '12:00']);
+  });
+
+  it('calls fetchAPI for today and returns its result', () => {
     const times = initializeTimes();
-    expect(Array.isArray(times)).toBe(true);
-    expect(times).toEqual(["18:00", "19:00", "20:00", "21:00", "22:00"]);
+    // Should call fetchAPI once with a Date
+    expect(window.fetchAPI).toHaveBeenCalledWith(expect.any(Date));
+    expect(times).toEqual(['10:00', '11:00', '12:00']);
   });
 });
 
 describe('updateTimes', () => {
-  test('returns same state for unknown action types', () => {
-    const prevState = ["12:00", "13:00"];
-    const action = { type: 'UNKNOWN_ACTION' };
-    const newState = updateTimes(prevState, action);
-    expect(newState).toBe(prevState); // should not mutate or replace
+  beforeAll(() => {
+    // Mock fetchAPI to return slots
+    window.fetchAPI = jest.fn().mockReturnValue(['14:00', '15:00', '16:00']);
   });
 
-  test('on UPDATE_TIMES action, returns initializeTimes output', () => {
-    const prevState = ["12:00", "13:00"];
-    const action = { type: 'UPDATE_TIMES', date: '2025-06-10' };
-    const newState = updateTimes(prevState, action);
+  it('returns same state for unknown action types', () => {
+    const prevState = ['12:00', '13:00'];
+    const newState = updateTimes(prevState, { type: 'UNKNOWN_ACTION' });
+    expect(newState).toBe(prevState);
+  });
 
-    // initializeTimes() is hard-coded to return ["18:00", "19:00", "20:00", "21:00", "22:00"]
-    expect(newState).toEqual(initializeTimes());
-    expect(newState).not.toBe(prevState); // confirm it’s a new array reference
+  it('filters out existingBookings for the given date', () => {
+    const actionDate = new Date('2025-06-10');
+    const existingBookings = [
+      { date: '2025-06-10', time: '15:00' },
+      { date: '2025-06-11', time: '16:00' }
+    ];
+    const action = {
+      type: 'UPDATE_TIMES',
+      date: actionDate,
+      existingBookings,
+    };
+
+    const result = updateTimes([], action);
+
+    // Should call fetchAPI with the provided date
+    expect(window.fetchAPI).toHaveBeenCalledWith(actionDate);
+    // Should remove the booked '15:00', leaving ['14:00','16:00']
+    expect(result).toEqual(['14:00', '16:00']);
   });
 });
+
