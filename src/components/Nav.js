@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from 'react-router-dom';
+import { NavLink } from "react-router-dom";
 import { HiMenu, HiX } from 'react-icons/hi';
 
 function Nav() {
@@ -10,34 +11,98 @@ function Nav() {
     }
 
     return (
-        <>
-            <nav>
-                <button className="hamburger" onClick={() => setMenuOpen(true)}>
-                    <HiMenu />
-                </button>
+      <>
+        <nav>
+          <button 
+          className="hamburger" 
+          aria-label="Open navigation menu"
+          onClick={() => setMenuOpen(true)}>
+            <HiMenu aria-hidden="true"/>
+          </button>
 
-                <ul className={`nav-list ${menuOpen ? 'show' : ''}`}>
-                {/* Close Icon */}
-                    <button className="nav-close" onClick={() => setMenuOpen(false)}>
-                        <HiX />
-                    </button>
+          <ul className={`nav-list ${menuOpen ? "show" : ""}`}>
+            {/* Close Icon */}
+            <button 
+            className="nav-close"
+            aria-label="Close navigation menu"
+            onClick={() => setMenuOpen(false)}>
+              <HiX aria-hidden="true"/>
+            </button>
 
-                    <li><Link to="/" onClick={handleLinkClick}>Home</Link></li>
-                    <li><Link to="/about" onClick={handleLinkClick}>About</Link></li>
-                    <li><Link to="/menu" onClick={handleLinkClick}>Menu</Link></li>
-                    <li><Link to="/booking" onClick={handleLinkClick}>Book Now</Link></li>
-                    <li><Link to="/order" onClick={handleLinkClick}>Order Online</Link></li>
-                    <li><Link to="/login" onClick={handleLinkClick}>Login</Link></li>
-                </ul>
-                <div
-                    className={`overlay ${menuOpen ? 'show' : ''}`}
-                    onClick={() => setMenuOpen(false)}/>
-            </nav>
-        </>
-
-
-
-    )
+            <li>
+              <NavLink
+                to="/"
+                onClick={handleLinkClick}
+                className={({ isActive }) =>
+                  isActive ? "active-nav-link" : undefined
+                }
+              >
+                Home
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/about"
+                className={({ isActive }) =>
+                  isActive ? "active-nav-link" : undefined
+                }
+                onClick={handleLinkClick}
+              >
+                About
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/menu"
+                className={({ isActive }) =>
+                  isActive ? "active-nav-link" : undefined
+                }
+                onClick={handleLinkClick}
+              >
+                Menu
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/booking"
+                className={({ isActive }) =>
+                  isActive ? "active-nav-link" : undefined
+                }
+                onClick={handleLinkClick}
+              >
+                Book Now
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/order"
+                className={({ isActive }) =>
+                  isActive ? "active-nav-link" : undefined
+                }
+                onClick={handleLinkClick}
+              >
+                Order Online
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  isActive ? "active-nav-link" : undefined
+                }
+                onClick={handleLinkClick}
+              >
+                Login
+              </NavLink>
+            </li>
+          </ul>
+          <div
+            className={`overlay ${menuOpen ? "show" : ""}`}
+            onClick={() => setMenuOpen(false)}
+          />
+        </nav>
+      </>
+    );
 }
 
 export default Nav;

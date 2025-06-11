@@ -54,6 +54,11 @@ header .container {
   list-style: none;
 }
 
+.nav-list .active-nav-link {
+  text-decoration: underline;
+  font-weight: bold;
+}
+
 .nav-list a {
   text-decoration: none;
   color: #333;

@@ -1,106 +1,156 @@
 /* ===== Booking Page Styles ===== */
 .booking-page {
-    background-color: #495E57;
-    padding: 4rem 1rem;
-  }
-  
-  .booking-container {
-    background-color: #fff;
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 2rem;
-    border-radius: 16px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  }
-  
-  .booking-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-  }
-  
-  /* Grid layout for top input fields */
-  .booking-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
-  }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Labels and text */
-  label,
-  .label {
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    color: #333;
-  }
-  
-  .form-note {
-    font-size: 0.875rem;
-    color: #666;
-    margin-top: -1rem;
-  }
-  
-  /* Inputs and dropdown styling */
-  input[type="date"],
-  select,
-  textarea {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    background-color: #f1f3f2;
-    border: none;
-    border-radius: 12px;
-    padding: 1rem;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #333;
-    font-family: "Karla", sans-serif;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    background-size: 1rem;
-  }
-  
-  input[type="date"]::-webkit-calendar-picker-indicator {
-    opacity: 0; /* hide default calendar icon */
-  }
-  
-  textarea {
-    min-height: 120px;
-    resize: vertical;
-  }
-  
-  /* Radio buttons for seating options */
-  .radio-group {
-    display: flex;
-    gap: 2rem;
-    margin-top: 0.5rem;
-  }
-  
-  .radio-group label {
-    font-weight: normal;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  /* CTA Button */
+  background-color: #495E57;
+  padding: 4rem 1rem;
+}
 
-  .button-wrapper {
-    display: flex;
-    justify-content: center;
-    text-decoration: none;
-    width: 100%;
-  }
+.booking-container {
+  background-color: #fff;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
 
-  .cta-button.full-width {
-    width: 100%;
-  }
-  
+.booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Grid layout for top input fields */
+.booking-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Labels and text */
+label,
+.label {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.form-note {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: -1rem;
+}
+
+/* Inputs and dropdown styling */
+input[type="date"],
+select,
+textarea {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #f1f3f2;
+  border: none;
+  border-radius: 16px;
+  padding: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color:#495E57;
+  font-family: "Karla", sans-serif;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='20' viewBox='0 0 24 24' width='20' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1rem;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  /* hide default calendar icon */
+}
+
+select:focus,
+input[type="date"]:focus,
+textarea:focus {
+  outline: 2px solid #495E57;    /* your brand color */
+          /* space between element and ring */
+}
+
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Radio buttons for seating options */
+fieldset {
+border: none;
+margin: 0;
+padding: 0;
+}
+
+.radio-group {
+  display: flex;
+  gap: 2rem;
+  margin-top: 0.5rem;
+}
+
+.radio-group label {
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* CTA Button */
+
+.button-wrapper {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cta-button.full-width {
+  width: 100%;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reset-button,
+.cancel-button {
+  padding: 0.75rem 1.5rem;
+  border-radius: 16px;
+  border: 2px solid #FBDABB;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  background-color: #FBDABB;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.reset-button:hover,
+.cancel-button:hover {
+  background-color: #EE9972;
+  border: 2px solid #EE9972;
+}
+
+.error {
+  padding-top: 1rem;
+  padding-left: 0.25rem;
+  color: #e74c3c;
+  font-size: 0.875rem;
+  font-weight: normal;
+}
+
+.error-field {
+  border: 2px solid #e74c3c;
+  border-radius: 16px;
+  transition: box-shadow 0.2s ease;
+}

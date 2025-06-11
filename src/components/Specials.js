@@ -6,7 +6,7 @@ function Specials() {
         <div className="container">
         <div className="specials-header">
           <h2>This week's specials!</h2>
-          <button className="cta-button">Online Menu</button>
+          <button className="cta-button" aria-label="On Click">Online Menu</button>
         </div>
         <div className="specials-cards">
           {/* Special 1 */}
