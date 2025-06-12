@@ -10,15 +10,10 @@ function ConfirmationPage({cancelBooking}) {
   const location = useLocation();
   const data = location.state || {};
 
-  const handleCancel = () => {
-    cancelBooking(data.id);
-    setIsCancelled(true);
-
-    setTimeout(() => navigate("/"), 3000);
-  };
-
   const formattedDate = data.date
-    ? new Date(data.date).toLocaleDateString("en-US", {
+    ? new Date(data.date).toLocaleDateString("en-GB", 
+      {
+        weekday: "short",
         day: "numeric",
         month: "short",
         year: "numeric",
@@ -31,7 +26,7 @@ function ConfirmationPage({cancelBooking}) {
         <div className="cancel-container">
           <h1>Reservation Cancelled</h1>
           <p className="reservation">
-            Your reservation for {data.date} at {data.time} has been cancelled.
+            Your reservation for {formattedDate} at {data.time} has been cancelled.
           </p>
           <p>We’d love to see you another time! Feel free to browse our menu or make a new booking.</p>
              <button

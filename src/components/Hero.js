@@ -29,7 +29,7 @@ function Hero() {
                      <motion.h2 variants={fadeIn}>Chicago</motion.h2>
                      <motion.p variants={fadeIn}>Find a table for any occasion</motion.p>
                         <Link to="/booking">
-                            <button className="cta-button" aria-label="On Click">Book Now</button>
+                            <button className="cta-button" aria-label="On Click">Reserve a Table</button>
                         </Link>
                     </motion.div>
                 <img src="images/restauranfood1.jpg" alt="Hero img" className="hero-image"/>

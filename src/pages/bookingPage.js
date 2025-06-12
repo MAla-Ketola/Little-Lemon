@@ -36,8 +36,8 @@ function BookingPage({availableTimes, dispatch, submitForm, bookings}) {
               },
             }}
           >
-            <motion.h1 variants={fadeIn}>Little Lemon</motion.h1>
-            <motion.h2 variants={fadeIn}>Chicago</motion.h2>
+            <motion.h1 variants={fadeIn}>Reservations</motion.h1>
+            <motion.h2 variants={fadeIn}>Little Lemon</motion.h2>
             <motion.p variants={fadeIn}>Find a table for any occasion</motion.p>
           </motion.div>
           <img

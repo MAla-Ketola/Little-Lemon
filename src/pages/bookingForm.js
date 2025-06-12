@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { Calendar, Users, Clock, Wine } from "lucide-react";
 import "./bookingpage.css";
 
 function BookingForm({
@@ -38,11 +39,10 @@ function BookingForm({
   });
 
   const errors = {};
-  if (!date)     errors.date     = "Please select a reservation date.";
-  if (!time)     errors.time     = "Please choose a time slot.";
-  if (!guests)   errors.guests   = "Please select the number of guests.";
+  if (!date) errors.date = "Please select a reservation date.";
+  if (!time) errors.time = "Please choose a time slot.";
+  if (!guests) errors.guests = "Please select the number of guests.";
   if (!occasion) errors.occasion = "Please pick an occasion.";
-
 
   // Dispatch initial load of times for today's date
   useEffect(() => {
@@ -54,13 +54,13 @@ function BookingForm({
   }, []);
 
   useEffect(() => {
-    if(formRef.current) {
+    if (formRef.current) {
       setIsValid(formRef.current.checkValidity());
     }
   }, [date, time, guests, occasion, seating]);
 
   const handleBlur = (field) => () => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
   // on date-change:
@@ -109,40 +109,27 @@ function BookingForm({
     }
   };
 
-  const handleReset = () => {
-    setDate(initialBooking.date || todayString);
-    setTime(initialBooking.time || "");
-    setGuests(initialBooking.guests || "");
-    setOccasion(initialBooking.occasion || "");
-    setSeating(initialBooking.seating || "inside");
-    setComments(initialBooking.comments || "");
-
-    dispatch({
-      type: "UPDATE_TIMES",
-      date: new Date(initialBooking.date || todayString),
-      existingBookings: otherBookings,
-    });
-    setTouched({ date: false, time: false, guests: false, occasion: false });
-  };
-
   return (
     <form ref={formRef} className="booking-form" onSubmit={handleSubmit}>
       <div className="booking-grid">
         {/* --- Date */}
         <div className="form-group">
           <label htmlFor="res-date">Date</label>
-          <input
-            type="date"
-            id="res-date"
-            name="res-date"
-            value={date}
-            onChange={handleDateChange}
-            required
-            min={todayString}
-            ref={dateRef}
-            className={touched.date && errors.date ? "error-field" : ""}
-            onBlur={handleBlur("date")}
-          />
+          <div className="input-icon">
+            <Calendar size={20} className="icon" />
+            <input
+              type="date"
+              id="res-date"
+              name="res-date"
+              value={date}
+              onChange={handleDateChange}
+              required
+              min={todayString}
+              ref={dateRef}
+              className={touched.date && errors.date ? "error-field" : ""}
+              onBlur={handleBlur("date")}
+            />
+          </div>
           {touched.date && errors.date && (
             <label htmlFor="res-date" className="error" tabIndex={0}>
               {errors.date}
@@ -153,25 +140,28 @@ function BookingForm({
         {/* --- Time field: options come from props.availableTimes --- */}
         <div className="form-group">
           <label htmlFor="res-time">Time</label>
-          <select
-            id="res-time"
-            name="res-time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            onBlur={handleBlur("time")}
-            required
-            className={touched.time && errors.time ? "error-field" : ""}
-            ref={timeRef}
-          >
-            <option value="" disabled hidden>
-              Select time
-            </option>
-            {availableTimes.map((t) => (
-              <option key={t} value={t}>
-                {t}
+          <div className="input-icon">
+            <Clock size={20} className="icon" />
+            <select
+              id="res-time"
+              name="res-time"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              onBlur={handleBlur("time")}
+              required
+              className={touched.time && errors.time ? "error-field" : ""}
+              ref={timeRef}
+            >
+              <option value="" disabled hidden>
+                Select time
               </option>
-            ))}
-          </select>
+              {availableTimes.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+          </div>
           {touched.time && errors.time && (
             <label htmlFor="res-time" className="error" tabIndex={0}>
               {errors.time}
@@ -182,25 +172,28 @@ function BookingForm({
         {/* --- Number of guests --- */}
         <div className="form-group">
           <label htmlFor="guests">Number of Guests</label>
-          <select
-            id="guests"
-            name="guests"
-            value={guests}
-            onChange={(e) => setGuests(e.target.value)}
-            onBlur={handleBlur("guests")}
-            required
-            className={touched.guests && errors.guests ? "error-field" : ""}
-            ref={guestsRef}
-          >
-            <option value="" disabled hidden>
-              Select number
-            </option>
-            {[...Array(10)].map((_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {i + 1}
+          <div className="input-icon">
+            <Users size={20} className="icon" />
+            <select
+              id="guests"
+              name="guests"
+              value={guests}
+              onChange={(e) => setGuests(e.target.value)}
+              onBlur={handleBlur("guests")}
+              required
+              className={touched.guests && errors.guests ? "error-field" : ""}
+              ref={guestsRef}
+            >
+              <option value="" disabled hidden>
+                Select number
               </option>
-            ))}
-          </select>
+              {[...Array(10)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
+          </div>
           {touched.guests && errors.guests && (
             <label htmlFor="res-guests" className="error" tabIndex={0}>
               {errors.guests}
@@ -211,22 +204,28 @@ function BookingForm({
         {/* --- Occasion field --- */}
         <div className="form-group">
           <label htmlFor="occasion">Occasion</label>
-          <select
-            id="occasion"
-            name="occasion"
-            value={occasion}
-            onChange={(e) => setOccasion(e.target.value)}
-            onBlur={handleBlur("occasion")}
-            required
-            className={touched.occasion && errors.occasion ? "error-field" : ""}
-            ref={occasionRef}
-          >
-            <option value="" disabled hidden>
-              Select occasion
-            </option>
-            <option value="Birthday">Birthday</option>
-            <option value="Anniversary">Anniversary</option>
-          </select>
+          <div className="input-icon">
+            <Wine size={20} className="icon" />
+            <select
+              id="occasion"
+              name="occasion"
+              value={occasion}
+              onChange={(e) => setOccasion(e.target.value)}
+              onBlur={handleBlur("occasion")}
+              required
+              className={
+                touched.occasion && errors.occasion ? "error-field" : ""
+              }
+              ref={occasionRef}
+            >
+              <option value="" disabled hidden>
+                Select occasion
+              </option>
+              <option value="Birthday">Birthday</option>
+              <option value="Anniversary">Anniversary</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
           {touched.occasion && errors.occasion && (
             <label htmlFor="res-occasion" className="error" tabIndex={0}>
               {errors.occasion}
@@ -292,10 +291,6 @@ function BookingForm({
         >
           Let’s go!
         </button>
-
-        {/*<button type="button" className="reset-button" onClick={handleReset}>
-          Reset
-        </button>*/}
 
         <button
           type="button"

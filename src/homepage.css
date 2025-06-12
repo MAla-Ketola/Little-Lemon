@@ -50,22 +50,26 @@ header .container {
 
 .nav-list {
   display: flex;
-  gap: 1.5rem;
+  gap: 2rem;
   list-style: none;
 }
 
 .nav-list .active-nav-link {
-  text-decoration: underline;
+  color: #EDEFEE;
   font-weight: bold;
+  background-color: #495E57;
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
 }
 
 .nav-list a {
   text-decoration: none;
+  padding: 0.25rem 0.5rem;
   color: #333;
 }
 
 .nav-list a:hover {
-  text-decoration: underline;
+  color:#F4CE14;
 }
 
 .nav-close {
@@ -247,7 +251,7 @@ header .container {
   background-color: #FBDABB;
   text-align: center;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
-  padding: 2rem 1rem 4rem;
+  padding: 2rem 1rem;
 }
 
 .testimonials-section h2 {
@@ -264,35 +268,38 @@ header .container {
 .testimonial-card {
   background: #EE9972;
   border-radius: 16px;
-  box-shadow: 0px 4px 6px rgba(0,0,0,0.1);
-  width: 100%;
+  box-shadow: 0px 8px 20px rgba(0,0,0,0.1);
   transition: transform 0.3s;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  padding: 2rem 1rem;
 }
 
 .testimonial-cards h3 {
-  font-weight: bold;
-  margin: 0.25rem 0 0;
+  margin: 0;
+  font-size: 1.25rem;
+  color: #333;
 }
 
 .testimonial-card p {
-  padding: 0 1rem 1rem;
+  position: relative;
+  z-index: 2;
+  font-style: italic;
+  margin: 1rem 0 1.5rem;
+  color: #333;
 }
 
 .testimonial-card-header {
   display: flex;
   align-items: center;
-  gap: 2rem;
-  margin-top: 1rem;
-  padding: 0 1rem;
+  gap: 1rem;
+  position: relative;
+  z-index: 2;
 }
 
 .testimonial-card img {
   width: 100px;
   height: 100px;
-  border-radius: 16px;
+  border-radius: 50%;
+  border: 3px solid #F4CE14;
   object-fit: cover;
 }
 
@@ -550,13 +557,39 @@ footer img {
   }
 
   .special-card {
-    height: 175px;
+    height: auto;
   }
 
   .special-card img {
-    height: 175px;
+    height: auto;
   }
 
+  .testimonial-card {
+    padding: 1.5rem 1rem;    
+  }
+
+  .testimonial-card-header {
+    flex-direction: column;      /* stack avatar, stars & name vertically */
+    align-items: center;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .star-rating {
+    order: 2;                    /* move stars below the image if you like */
+  }
+
+  .star-rating span {
+    font-size: 1.2rem;           /* scale down the stars */
+    line-height: 1;
+  }
+
+  .testimonial-card p {
+    font-size: 0.95rem;          /* make body text a bit more compact */
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;            /* ensure good readability */
+  }
 }
 
 @media (max-width: 440px) {
