@@ -3,20 +3,52 @@ import "./contactInfoPage.css";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { HiArrowLeft } from "react-icons/hi";
+import { useBooking } from "../context/bookingContext";
+import useFormFields from "../hooks/useFormFields";
 
-function ContactInfoPage( {submitForm} ) {
+// validator for contact info
+function validateContact(values) {
+  const errors = {};
+  if (!values.firstName) errors.firstName = "First name required";
+  if (!values.lastName) errors.lastName = "Last name required";
+  if (!/\S+@\S+\.\S+/.test(values.email)) errors.email = "Valid email required";
+  if (!values.phone) errors.phone = "Phone number is required.";
+  if (!values.postal) errors.postal = "Postal code is required.";
+  if (!values.day || !values.month)
+    errors.birthday = "Please enter your birthday.";
+  if (!values.agreed) errors.agreed = "You must accept the policy.";
+  return errors;
+}
+
+function ContactInfoPage() {
+  const { submitForm } = useBooking();
   const navigate = useNavigate();
   const location = useLocation();
   const booking = location.state || {};
 
-  const [firstName, setFirstName] = useState(booking.firstName ||"");
-  const [lastName, setLastName] = useState(booking.lastName ||"");
-  const [email, setEmail] = useState(booking.email ||"");
-  const [phone, setPhone] = useState(booking.phone ||"");
-  const [postal, setPostal] = useState(booking.postal ||"");
-  const [day, setDay] = useState(booking.day ||"");
-  const [month, setMonth] = useState(booking.month ||"");
-  const [agreed, setAgreed] = useState(booking.agreed ||false);
+  const {
+    values,
+    errors,
+    touched,
+    isValid,
+    handleChange,
+    handleBlur,
+    setValues,
+    setTouched,
+    validateForm
+  } = useFormFields(
+    {
+      firstName: booking.firstName || "",
+      lastName: booking.lastName || "",
+      email: booking.email || "",
+      phone: booking.phone || "",
+      postal: booking.postal || "",
+      day: booking.day || "",
+      month: booking.month || "",
+      agreed: booking.agreed || false,
+    },
+    validateContact
+  );
 
   const formRef = useRef(null);
   const firstNameRef = useRef();
@@ -27,103 +59,44 @@ function ContactInfoPage( {submitForm} ) {
   const dayRef = useRef();
   const monthRef = useRef();
   const agreedRef = useRef();
-  const [isValid, setIsValid] = useState(false);
 
   const formattedDate = booking.date
     ? new Date(booking.date).toLocaleDateString("en-GB", {
         weekday: "short",
         day: "numeric",
         month: "short",
-        year: "numeric"
+        year: "numeric",
       })
     : "";
 
-  const [touched, setTouched] = useState({
-    firstName: false,
-    lastName: false,
-    email: false,
-    phone: false,
-    postal: false,
-    day: false,
-    month: false,
-    agreed: false,
-  });
-
-  const errors = {};
-  if (!firstName) errors.firstName = "First name is required.";
-  if (!lastName) errors.lastName = "Last name is required.";
-  if (!email) errors.email = "Email address is required.";
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    errors.email = "Enter a valid email.";
-  if (!phone) errors.phone = "Phone number is required.";
-  if (!postal) errors.postal = "Postal code is required.";
-  if (!day || !month) errors.birthday = "Please enter your birthday.";
-  if (!agreed) errors.agreed = "You must accept the policy.";
-
-  const handleBlur = (field) => () => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  useEffect(() => {
-    if (formRef.current) {
-      setIsValid(formRef.current.checkValidity());
-    }
-  }, [firstName, lastName, email, phone, postal, day, month, agreed]);
-
   const handleSubmit = (e) => {
     e.preventDefault();
-    // mark everything touched
-    setTouched(
-      Object.keys(touched).reduce((acc, f) => ({ ...acc, [f]: true }), {})
-    );
 
-    if (!isValid) {
-      if (errors.firstName) {
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+            if (validationErrors.firstName) {
         firstNameRef.current.focus();
-      } else if (errors.lastName) {
+      } else if (validationErrors.lastName) {
         lastNameRef.current.focus();
-      } else if (errors.email) {
+      } else if (validationErrors.email) {
         emailRef.current.focus();
-      } else if (errors.phone) {
+      } else if (validationErrors.phone) {
         phoneRef.current.focus();
-      } else if (errors.postal) {
+      } else if (validationErrors.postal) {
         postalRef.current.focus();
-      } else if (errors.day) {
+      } else if (validationErrors.day) {
         dayRef.current.focus();
-      } else if (errors.month) {
+      } else if (validationErrors.month) {
         monthRef.current.focus();
-      } else if (errors.agreed) {
+      } else if (validationErrors.agreed) {
         agreedRef.current.focus();
       }
       return;
     }
 
-    // stop if any errors
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-
-    // proceed: navigate to confirmation, pass along all state
-    const formData = {
-        ...booking,
-        firstName,
-        lastName,
-        email,
-        phone,
-        postal,
-        day,
-        month,
-        agreed,
-      }
-
-      const saved = submitForm(formData);
-      if (!saved) {
-      alert("Sorry—couldn’t complete your reservation. Please try again.");
-      return;
-    }
-
-    // on success, navigate with the real `id` in state
-    navigate("/booking/contact/confirmation", { state: saved });
+    const payload = { ...booking, ...values };
+    const saved = submitForm(payload);
+    if (saved) navigate("/booking/contact/confirmation", { state: saved });
   };
 
   return (
@@ -131,7 +104,10 @@ function ContactInfoPage( {submitForm} ) {
       {/* Top Booking Info Banner */}
       <section className="booking-banner">
         <div className="banner-content">
-          <button className="back-button" onClick={() => navigate("/booking", {state: booking})}>
+          <button
+            className="back-button"
+            onClick={() => navigate("/booking", { state: booking })}
+          >
             <HiArrowLeft />
           </button>
           <p>
@@ -160,11 +136,11 @@ function ContactInfoPage( {submitForm} ) {
               <input
                 type="text"
                 id="res-firstName"
-                name="res-firstName"
-                value={firstName}
+                name="firstName"
+                value={values.firstName}
                 ref={firstNameRef}
-                onChange={(e) => setFirstName(e.target.value)}
-                onBlur={handleBlur("firstName")}
+                onChange={handleChange}
+                onBlur={handleBlur}
                 className={
                   touched.firstName && errors.firstName ? "error-field" : ""
                 }
@@ -181,11 +157,11 @@ function ContactInfoPage( {submitForm} ) {
               <input
                 type="text"
                 id="res-lastName"
-                name="res-lastName"
-                value={lastName}
+                name="lastName"
+                value={values.lastName}
                 ref={lastNameRef}
-                onChange={(e) => setLastName(e.target.value)}
-                onBlur={handleBlur("lastName")}
+                onChange={handleChange}
+                onBlur={handleBlur}
                 className={
                   touched.lastName && errors.lastName ? "error-field" : ""
                 }
@@ -193,108 +169,120 @@ function ContactInfoPage( {submitForm} ) {
                 required
               />
               {touched.lastName && errors.lastName && (
-                <label htmlFor="res-lastName" className="error" tabIndex={0}>{errors.lastName}</label>
+                <label htmlFor="res-lastName" className="error" tabIndex={0}>
+                  {errors.lastName}
+                </label>
               )}
 
               <label>Email Address*</label>
               <input
                 type="email"
                 id="res-email"
-                name="res-email"
-                value={email}
+                name="email"
+                value={values.email}
                 ref={emailRef}
-                onChange={(e) => setEmail(e.target.value)}
-                onBlur={handleBlur("email")}
+                onChange={handleChange}
+                onBlur={handleBlur}
                 className={touched.email && errors.email ? "error-field" : ""}
                 placeholder="Email Address"
                 required
               />
               {touched.email && errors.email && (
-                <label htmlFor="res-email" className="error" tabIndex={0}>{errors.email}</label>
+                <label htmlFor="res-email" className="error" tabIndex={0}>
+                  {errors.email}
+                </label>
               )}
 
               <label>Phone Number*</label>
               <input
                 type="tel"
                 id="res-phone"
-                name="res-phone"
-                value={phone}
+                name="phone"
+                value={values.phone}
                 ref={phoneRef}
-                onChange={(e) => setPhone(e.target.value)}
-                onBlur={handleBlur("phone")}
+                onChange={handleChange}
+                onBlur={handleBlur}
                 className={touched.phone && errors.phone ? "error-field" : ""}
                 placeholder="Phone Number"
                 required
               />
               {touched.phone && errors.phone && (
-                <label htmlFor="res-phone" className="error" tabIndex={0}>{errors.phone}</label>
+                <label htmlFor="res-phone" className="error" tabIndex={0}>
+                  {errors.phone}
+                </label>
               )}
 
               <label>Postal Code*</label>
               <input
                 type="text"
-                name="res-postal"
+                name="postal"
                 id="res-postal"
-                value={postal}
+                value={values.postal}
                 ref={postalRef}
-                onChange={(e) => setPostal(e.target.value)}
-                onBlur={handleBlur("postal")}
+                onChange={handleChange}
+                onBlur={handleBlur}
                 className={touched.postal && errors.postal ? "error-field" : ""}
                 placeholder="Postal Code"
               />
               {touched.postal && errors.postal && (
-                <label htmlFor="res-postal" className="error" tabIndex={0}>{errors.postal}</label>
+                <label htmlFor="res-postal" className="error" tabIndex={0}>
+                  {errors.postal}
+                </label>
               )}
 
               <label>Birthday</label>
               <div className="birthday-inputs">
                 <input
                   type="number"
-                  id="res-birthday"
-                  name="res-birthday"
+                  id="res-birthday-day"
+                  name="day"
                   placeholder="dd"
-                  value={day}
+                  value={values.day}
                   ref={dayRef}
-                  onChange={(e) => setDay(e.target.value)}
-                  onBlur={handleBlur("day")}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
                   min="1"
                   max="31"
                 />
                 <input
                   type="number"
-                  id="res-birthday"
-                  name="res-birthday"
+                  id="res-birthday-month"
+                  name="month"
                   placeholder="mm"
-                  value={month}
+                  value={values.month}
                   ref={monthRef}
-                  onChange={(e) => setMonth(e.target.value)}
-                  onBlur={handleBlur("month")}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
                   min="1"
                   max="12"
                 />
               </div>
               {touched.day && touched.month && errors.birthday && (
-                <label htmlFor="res-birthday" className="error" tabIndex={0}>{errors.birthday}</label>
+                <label htmlFor="res-birthday" className="error" tabIndex={0}>
+                  {errors.birthday}
+                </label>
               )}
 
               <label>
                 <input
                   type="checkbox"
                   id="res-agreed"
-                  name="res-agreed"
-                  checked={agreed}
+                  name="agreed"
+                  checked={values.agreed}
                   ref={agreedRef}
-                  onChange={(e) => setAgreed(e.target.checked)}
+                  onChange={handleChange}
                   className={
                     touched.agreed && errors.agreed ? "error-field" : ""
                   }
-                  onBlur={handleBlur("agreed")}
+                  onBlur={handleBlur}
                   required
                 />
                 I agree to the restaurant’s required policy*
               </label>
               {touched.agreed && errors.agreed && (
-                <label htmlFor="res-agreed" className="error" tabIndex={0}>{errors.agreed}</label>
+                <label htmlFor="res-agreed" className="error" tabIndex={0}>
+                  {errors.agreed}
+                </label>
               )}
 
               <button

@@ -3,8 +3,11 @@ import './bookingpage.css';
 import { motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
 import BookingForm from "./bookingForm";
+import { useBooking } from "../context/bookingContext";
 
-function BookingPage({availableTimes, dispatch, submitForm, bookings}) {
+function BookingPage() {
+
+  const { availableTimes, dispatch, submitForm, bookings } = useBooking();
 
   const location = useLocation();
   const initialBooking = location.state || {};

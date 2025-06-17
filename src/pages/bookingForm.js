@@ -3,13 +3,24 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Calendar, Users, Clock, Wine } from "lucide-react";
 import { useMemo } from "react";
 import "./bookingpage.css";
+import { useBooking } from "../context/bookingContext";
+import useFormFields from "../hooks/useFormFields";
 
-function BookingForm({
-  availableTimes,
-  dispatch,
-  bookings,
-  initialBooking = {},
-}) {
+function validateBooking(values) {
+  const errors = {};
+  if (!values.date) errors.date = "Please select a date";
+  if (!values.time) errors.time = "Please select a time";
+  if (!values.guests || values.guests < 1)
+    errors.guests = "Number of guests required";
+  if (!values.occasion) errors.occasion = "Please pick an occasion";
+  return errors;
+}
+
+function BookingForm() {
+  const { availableTimes, dispatch, bookings, submitForm } = useBooking();
+  const location = useLocation();
+  const initialBooking = location.state || {};
+  const currentBookingTime = initialBooking.time;
   const navigate = useNavigate();
 
   // Compute today's date string in YYYY-MM_DD format
@@ -18,94 +29,81 @@ function BookingForm({
     () => bookings.filter((b) => b.id !== initialBooking.id),
     [bookings, initialBooking.id]
   );
-  const currentBookingTime = initialBooking.time;
 
-  // 1) Local state for all form fields except availableTimes
-  const [date, setDate] = useState(initialBooking.date || todayString);
-  const [time, setTime] = useState(initialBooking.time || "");
-  const [guests, setGuests] = useState(initialBooking.guests || "");
-  const [occasion, setOccasion] = useState(initialBooking.occasion || "");
-  const [seating, setSeating] = useState(initialBooking.seating || "inside");
-  const [comments, setComments] = useState(initialBooking.comments || "");
+  const {
+    values,
+    errors,
+    touched,
+    isValid,
+    handleChange,
+    handleBlur,
+    setValues,
+    setTouched,
+    validateForm,
+  } = useFormFields(
+    {
+      date: initialBooking.date || todayString,
+      time: initialBooking.time || "",
+      guests: initialBooking.guests || "",
+      occasion: initialBooking.occasion || "",
+      seating: initialBooking.seating || "inside",
+      comments: initialBooking.comments || "",
+    },
+    validateBooking
+  );
 
   const formRef = useRef(null);
   const dateRef = useRef();
   const timeRef = useRef();
   const guestsRef = useRef();
   const occasionRef = useRef();
-  const [isValid, setIsValid] = useState(false);
 
-  const [touched, setTouched] = useState({
-    date: false,
-    time: false,
-    guests: false,
-    occasion: false,
-  });
-
-  const errors = {};
-  if (!date) errors.date = "Please select a reservation date.";
-  if (!time) errors.time = "Please choose a time slot.";
-  if (!guests) errors.guests = "Please select the number of guests.";
-  if (!occasion) errors.occasion = "Please pick an occasion.";
-
-  // Dispatch initial load of times for today's date
   useEffect(() => {
-    // whenever date or bookings change, recompute times *and* re-check validity
+    if (initialBooking.id) {
+      validateForm();
+    }
+  }, []);
+
+  // re-run UPDATE_TIMES on date change…
+  useEffect(() => {
     dispatch({
       type: "UPDATE_TIMES",
-      date: new Date(date),
+      date: new Date(values.date),
       existingBookings: otherBookings,
       currentBookingTime,
     });
-    setIsValid(formRef.current?.checkValidity() ?? false);
-  }, [date, bookings, time, guests, occasion, seating]);
-
-  const handleBlur = (field) => () => {
-    setTouched((prev) => ({ ...prev, [field]: true }));
-  };
-
-  // on date-change:
-  const handleDateChange = (e) => {
-    const newDateString = e.target.value;
-    setDate(newDateString);
-
-    dispatch({
-      type: "UPDATE_TIMES",
-      date: new Date(newDateString),
-      existingBookings: otherBookings,
-      currentBookingTime,
-    });
-  };
+  }, [values.date, bookings, values.time]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setTouched({ date: true, time: true, guests: true, occasion: true });
 
-    if (!isValid) {
-      if (errors.date) {
+    //navigate("/booking/contact", { state: formData });
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      if (validationErrors.date) {
         dateRef.current.focus();
-      } else if (errors.time) {
+      } else if (validationErrors.time) {
         timeRef.current.focus();
-      } else if (errors.guests) {
+      } else if (validationErrors.guests) {
         guestsRef.current.focus();
-      } else if (errors.occasion) {
+      } else if (validationErrors.occasion) {
         occasionRef.current.focus();
       }
       return;
     }
 
-    // include `id` so submitForm knows if it should update vs. add
-    const formData = {
-      ...initialBooking,
-      date,
-      time,
-      guests,
-      occasion,
-      seating,
-      comments,
-    };
+    // build your booking payload (preserves id if editing)
+    const payload = { ...initialBooking, ...values };
 
-    navigate("/booking/contact", { state: formData });
+    // call submitForm → adds or updates in context, returns the saved booking (with id)
+    const saved = submitForm(payload);
+    if (!saved) {
+      alert("Sorry—couldn’t proceed to contact info. Please try again.");
+      return;
+    }
+
+    // navigate on success
+    navigate("/booking/contact", { state: saved });
   };
 
   return (
@@ -119,14 +117,14 @@ function BookingForm({
             <input
               type="date"
               id="res-date"
-              name="res-date"
-              value={date}
-              onChange={handleDateChange}
+              name="date"
+              value={values.date}
+              onChange={handleChange}
               required
               min={todayString}
               ref={dateRef}
               className={touched.date && errors.date ? "error-field" : ""}
-              onBlur={handleBlur("date")}
+              onBlur={handleBlur}
             />
           </div>
           {touched.date && errors.date && (
@@ -138,15 +136,15 @@ function BookingForm({
 
         {/* --- Time field: options come from props.availableTimes --- */}
         <div className="form-group">
-          <label htmlFor="res-time">Time</label>
+          <label htmlFor="time">Time</label>
           <div className="input-icon">
             <Clock size={20} className="icon" />
             <select
-              id="res-time"
-              name="res-time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              onBlur={handleBlur("time")}
+              id="time"
+              name="time"
+              value={values.time}
+              onChange={handleChange}
+              onBlur={handleBlur}
               required
               className={touched.time && errors.time ? "error-field" : ""}
               ref={timeRef}
@@ -162,7 +160,7 @@ function BookingForm({
             </select>
           </div>
           {touched.time && errors.time && (
-            <label htmlFor="res-time" className="error" tabIndex={0}>
+            <label htmlFor="time" className="error" tabIndex={0}>
               {errors.time}
             </label>
           )}
@@ -176,9 +174,9 @@ function BookingForm({
             <select
               id="guests"
               name="guests"
-              value={guests}
-              onChange={(e) => setGuests(e.target.value)}
-              onBlur={handleBlur("guests")}
+              value={values.guests}
+              onChange={handleChange}
+              onBlur={handleBlur}
               required
               className={touched.guests && errors.guests ? "error-field" : ""}
               ref={guestsRef}
@@ -208,9 +206,9 @@ function BookingForm({
             <select
               id="occasion"
               name="occasion"
-              value={occasion}
-              onChange={(e) => setOccasion(e.target.value)}
-              onBlur={handleBlur("occasion")}
+              value={values.occasion}
+              onChange={handleChange}
+              onBlur={handleBlur}
               required
               className={
                 touched.occasion && errors.occasion ? "error-field" : ""
@@ -246,8 +244,8 @@ function BookingForm({
               type="radio"
               name="seating"
               value="inside"
-              checked={seating === "inside"}
-              onChange={(e) => setSeating(e.target.value)}
+              checked={values.seating === "inside"}
+              onChange={handleChange}
             />{" "}
             Inside
           </label>
@@ -256,8 +254,8 @@ function BookingForm({
               type="radio"
               name="seating"
               value="outside"
-              checked={seating === "outside"}
-              onChange={(e) => setSeating(e.target.value)}
+              checked={values.seating === "outside"}
+              onChange={handleChange}
             />{" "}
             Outside
           </label>
@@ -271,8 +269,8 @@ function BookingForm({
           id="comments"
           name="comments"
           placeholder="Let us know if you have any special requests..."
-          value={comments}
-          onChange={(e) => setComments(e.target.value)}
+          value={values.comments}
+          onChange={handleChange}
         />
       </div>
 
@@ -283,7 +281,8 @@ function BookingForm({
 
       <div className="button-wrapper">
         <button
-          type="submit"
+          type="button"
+          onClick={handleSubmit}
           aria-label="On Click"
           className={`cta-button full-width ${!isValid ? "disabled" : ""}`}
         >

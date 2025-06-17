@@ -1,9 +1,12 @@
 import React, { useState } from "react";
-import './confirmationPage.css';
+import "./confirmationPage.css";
 import { motion } from "framer-motion";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useBooking } from "../context/bookingContext";
 
-function ConfirmationPage({cancelBooking}) {
+function ConfirmationPage() {
+  const { cancelBooking } = useBooking();
+
   const [isCancelled, setIsCancelled] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const navigate = useNavigate();
@@ -11,8 +14,7 @@ function ConfirmationPage({cancelBooking}) {
   const data = location.state || {};
 
   const formattedDate = data.date
-    ? new Date(data.date).toLocaleDateString("en-GB", 
-      {
+    ? new Date(data.date).toLocaleDateString("en-GB", {
         weekday: "short",
         day: "numeric",
         month: "short",
@@ -26,15 +28,16 @@ function ConfirmationPage({cancelBooking}) {
         <div className="cancel-container">
           <h1>Reservation Cancelled</h1>
           <p className="reservation">
-            Your reservation for {formattedDate} at {data.time} has been cancelled.
+            Your reservation for {formattedDate} at {data.time} has been
+            cancelled.
           </p>
-          <p>We’d love to see you another time! Feel free to browse our menu or make a new booking.</p>
-             <button
-          className="cta-button"
-          onClick={() => navigate('/')}
-        >
-          Go Home
-        </button>
+          <p>
+            We’d love to see you another time! Feel free to browse our menu or
+            make a new booking.
+          </p>
+          <button className="cta-button" onClick={() => navigate("/")}>
+            Go Home
+          </button>
         </div>
       </section>
     );
@@ -50,8 +53,7 @@ function ConfirmationPage({cancelBooking}) {
       >
         <h1>Reservation Confirmed!</h1>
         <p>
-          A confirmation email has been sent to{" "}
-          <strong>{data.email}</strong>.
+          A confirmation email has been sent to <strong>{data.email}</strong>.
         </p>
 
         <div className="summary-box">
@@ -102,7 +104,8 @@ function ConfirmationPage({cancelBooking}) {
           <div className="confirm-overlay">
             <div className="confirm-box">
               <p>Are you sure you want to cancel?</p>
-              <button className="cta-button"
+              <button
+                className="cta-button"
                 onClick={() => {
                   cancelBooking(data.id);
                   setConfirming(false);
@@ -111,9 +114,12 @@ function ConfirmationPage({cancelBooking}) {
               >
                 Yes, cancel reservation
               </button>
-              <button 
-              className="cta-button"
-              onClick={() => setConfirming(false)}>No, keep reservation</button>
+              <button
+                className="cta-button"
+                onClick={() => setConfirming(false)}
+              >
+                No, keep reservation
+              </button>
             </div>
           </div>
         )}
