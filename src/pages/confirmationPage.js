@@ -51,7 +51,7 @@ function ConfirmationPage({cancelBooking}) {
         <h1>Reservation Confirmed!</h1>
         <p>
           A confirmation email has been sent to{" "}
-          <strong>emma@example.com</strong>.
+          <strong>{data.email}</strong>.
         </p>
 
         <div className="summary-box">

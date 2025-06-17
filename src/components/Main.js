@@ -15,7 +15,7 @@ export function updateTimes(state, action) {
   if (action.type !== "UPDATE_TIMES") {
     return state;
   }
-  const { date, existingBookings = [] } = action;
+  const { date, existingBookings = [], currentBookingTime } = action;
 
   const allSlots =
     typeof window.fetchAPI === "function" ? window.fetchAPI(date) : [];
@@ -25,7 +25,15 @@ export function updateTimes(state, action) {
     .filter((b) => new Date(b.date).toDateString() === date.toDateString())
     .map((b) => b.time);
 
-  return allSlots.filter((slot) => !bookedSlots.includes(slot));
+  let available = allSlots.filter((slot) => !bookedSlots.includes(slot));
+
+  // If modifying a booking, re-include their current time if it was removed
+  if (currentBookingTime && !available.includes(currentBookingTime)) {
+    available.push(currentBookingTime);
+    available.sort(); // optional
+  }
+
+  return available;
 }
 
 export default function Main({ children }) {
@@ -47,27 +55,57 @@ export default function Main({ children }) {
   }, [bookings]);
 
   const submitForm = (formData) => {
-    if (!window.submitAPI(formData)) return false;
+    if (!window.submitAPI(formData)) return null;
 
     if (formData.id) {
-      // — modifying an existing booking —
-      setBookings((prev) =>
-        prev.map((b) => (b.id === formData.id ? formData : b))
-      );
-      // send the updated booking (with its id) into state:
-      navigate("/booking/contact", { state: formData });
-    } else {
-      // — brand-new booking — give it an ID _and_ use _that_ object for both storage and navigation
-      const bookingWithId = { ...formData, id: Date.now() };
-      setBookings((prev) => [...prev, bookingWithId]);
-      navigate("/booking/contact", { state: bookingWithId });
-    }
+      // --- Existing booking (modification) ---
+      setBookings((prev) => {
+        const previous = prev.find((b) => b.id === formData.id);
+        const updated = prev.map((b) => (b.id === formData.id ? formData : b));
 
-    return true;
+        if (
+          previous &&
+          (previous.date !== formData.date || previous.time !== formData.time)
+        ) {
+          dispatch({
+            type: "UPDATE_TIMES",
+            date: new Date(formData.date),
+            existingBookings: updated.filter((b) => b.id !== formData.id),
+          });
+        }
+        return updated;
+      });
+      return formData;
+    } else {
+      // --- New booking ---
+      const bookingWithId = { ...formData, id: Date.now() };
+
+      setBookings((prev) => [...prev, bookingWithId]);
+
+      dispatch({
+        type: "UPDATE_TIMES",
+        date: new Date(bookingWithId.date),
+        existingBookings: [...bookings, bookingWithId],
+      });
+      return bookingWithId;
+    }
   };
 
   const cancelBooking = (bookingId) => {
-    setBookings((prev) => prev.filter((b) => b.id !== bookingId));
+    // 1) find the one being cancelled
+    const cancelled = bookings.find((b) => b.id === bookingId);
+    if (!cancelled) return;
+
+    // 2) drop it from state
+    const updated = bookings.filter((b) => b.id !== bookingId);
+    setBookings(updated);
+
+    // 3) immediately re-run UPDATE_TIMES for that date
+    dispatch({
+      type: "UPDATE_TIMES",
+      date: new Date(cancelled.date),
+      existingBookings: updated,
+    });
   };
 
   return (

@@ -1,18 +1,24 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Calendar, Users, Clock, Wine } from "lucide-react";
+import { useMemo } from "react";
 import "./bookingpage.css";
 
 function BookingForm({
   availableTimes,
   dispatch,
-  submitForm,
   bookings,
   initialBooking = {},
 }) {
+  const navigate = useNavigate();
+
   // Compute today's date string in YYYY-MM_DD format
   const todayString = new Date().toISOString().split("T")[0];
-  const otherBookings = bookings.filter((b) => b.id !== initialBooking.id);
+  const otherBookings = useMemo(
+    () => bookings.filter((b) => b.id !== initialBooking.id),
+    [bookings, initialBooking.id]
+  );
+  const currentBookingTime = initialBooking.time;
 
   // 1) Local state for all form fields except availableTimes
   const [date, setDate] = useState(initialBooking.date || todayString);
@@ -29,8 +35,6 @@ function BookingForm({
   const occasionRef = useRef();
   const [isValid, setIsValid] = useState(false);
 
-  const navigate = useNavigate();
-
   const [touched, setTouched] = useState({
     date: false,
     time: false,
@@ -46,18 +50,15 @@ function BookingForm({
 
   // Dispatch initial load of times for today's date
   useEffect(() => {
+    // whenever date or bookings change, recompute times *and* re-check validity
     dispatch({
       type: "UPDATE_TIMES",
       date: new Date(date),
       existingBookings: otherBookings,
+      currentBookingTime,
     });
-  }, []);
-
-  useEffect(() => {
-    if (formRef.current) {
-      setIsValid(formRef.current.checkValidity());
-    }
-  }, [date, time, guests, occasion, seating]);
+    setIsValid(formRef.current?.checkValidity() ?? false);
+  }, [date, bookings, time, guests, occasion, seating]);
 
   const handleBlur = (field) => () => {
     setTouched((prev) => ({ ...prev, [field]: true }));
@@ -72,6 +73,7 @@ function BookingForm({
       type: "UPDATE_TIMES",
       date: new Date(newDateString),
       existingBookings: otherBookings,
+      currentBookingTime,
     });
   };
 
@@ -94,7 +96,7 @@ function BookingForm({
 
     // include `id` so submitForm knows if it should update vs. add
     const formData = {
-      id: initialBooking.id,
+      ...initialBooking,
       date,
       time,
       guests,
@@ -103,10 +105,7 @@ function BookingForm({
       comments,
     };
 
-    const ok = submitForm(formData);
-    if (!ok) {
-      alert("Sorry, we couldn’t complete your booking. Please try again.");
-    }
+    navigate("/booking/contact", { state: formData });
   };
 
   return (
@@ -284,8 +283,7 @@ function BookingForm({
 
       <div className="button-wrapper">
         <button
-          type="button"
-          onClick={handleSubmit}
+          type="submit"
           aria-label="On Click"
           className={`cta-button full-width ${!isValid ? "disabled" : ""}`}
         >
