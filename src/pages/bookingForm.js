@@ -4,234 +4,145 @@ import { Calendar, Users, Clock, Wine } from "lucide-react";
 import { useMemo } from "react";
 import "./bookingpage.css";
 import { useBooking } from "../context/bookingContext";
-import useFormFields from "../hooks/useFormFields";
-
-function validateBooking(values) {
-  const errors = {};
-  if (!values.date) errors.date = "Please select a date";
-  if (!values.time) errors.time = "Please select a time";
-  if (!values.guests || values.guests < 1)
-    errors.guests = "Number of guests required";
-  if (!values.occasion) errors.occasion = "Please pick an occasion";
-  return errors;
-}
+import { useForm } from "react-hook-form";
+import { DateField } from "../components/DateField";
+import { SelectField } from "../components/SelectField";
 
 function BookingForm() {
   const { availableTimes, dispatch, bookings, submitForm } = useBooking();
   const location = useLocation();
   const initialBooking = location.state || {};
-  const currentBookingTime = initialBooking.time;
   const navigate = useNavigate();
-
-  // Compute today's date string in YYYY-MM_DD format
   const todayString = new Date().toISOString().split("T")[0];
-  const otherBookings = useMemo(
-    () => bookings.filter((b) => b.id !== initialBooking.id),
-    [bookings, initialBooking.id]
-  );
 
-  const {
-    values,
-    errors,
-    touched,
-    isValid,
-    handleChange,
-    handleBlur,
-    setValues,
-    setTouched,
-    validateForm,
-  } = useFormFields(
-    {
+  const defaultValues = useMemo(
+    () => ({
       date: initialBooking.date || todayString,
       time: initialBooking.time || "",
       guests: initialBooking.guests || "",
       occasion: initialBooking.occasion || "",
       seating: initialBooking.seating || "inside",
       comments: initialBooking.comments || "",
-    },
-    validateBooking
+    }),
+    [initialBooking, todayString]
+  );
+  const otherBookings = useMemo(
+    () => bookings.filter((b) => b.id !== initialBooking.id),
+    [bookings, initialBooking.id]
   );
 
-  const formRef = useRef(null);
-  const dateRef = useRef();
-  const timeRef = useRef();
-  const guestsRef = useRef();
-  const occasionRef = useRef();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setFocus,
+    formState: { errors, isValid, touchedFields },
+  } = useForm({
+    mode: "all",
+    defaultValues,
+  });
 
-  useEffect(() => {
-    if (initialBooking.id) {
-      validateForm();
-    }
-  }, []);
+  const watchedDate = watch("date");
+  const watchedTime = watch("time");
 
-  // re-run UPDATE_TIMES on date change…
+  // Recalculate available times when date or bookings change
   useEffect(() => {
     dispatch({
       type: "UPDATE_TIMES",
-      date: new Date(values.date),
+      date: new Date(watchedDate),
       existingBookings: otherBookings,
-      currentBookingTime,
+      currentBookingTime: initialBooking.time,
     });
-  }, [values.date, bookings, values.time]);
+  }, [watchedDate, bookings, initialBooking.time, dispatch, otherBookings]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    //navigate("/booking/contact", { state: formData });
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-      if (validationErrors.date) {
-        dateRef.current.focus();
-      } else if (validationErrors.time) {
-        timeRef.current.focus();
-      } else if (validationErrors.guests) {
-        guestsRef.current.focus();
-      } else if (validationErrors.occasion) {
-        occasionRef.current.focus();
-      }
-      return;
-    }
-
-    // build your booking payload (preserves id if editing)
+  const onSubmit = (values) => {
     const payload = { ...initialBooking, ...values };
-
-    // call submitForm → adds or updates in context, returns the saved booking (with id)
     const saved = submitForm(payload);
     if (!saved) {
-      alert("Sorry—couldn’t proceed to contact info. Please try again.");
+      alert("Sorry—couldn't proceed to contact info. Please try again.");
       return;
     }
-
-    // navigate on success
     navigate("/booking/contact", { state: saved });
   };
 
+  const onError = (fieldErrors) => {
+    const firstError = Object.keys(fieldErrors)[0];
+    setFocus(firstError);
+  };
+
   return (
-    <form ref={formRef} className="booking-form" onSubmit={handleSubmit}>
+    <form
+      className="booking-form"
+      onSubmit={handleSubmit(onSubmit, onError)}
+      noValidate
+    >
       <div className="booking-grid">
-        {/* --- Date */}
         <div className="form-group">
-          <label htmlFor="res-date">Date</label>
           <div className="input-icon">
             <Calendar size={20} className="icon" />
-            <input
-              type="date"
-              id="res-date"
-              name="date"
-              value={values.date}
-              onChange={handleChange}
-              required
-              min={todayString}
-              ref={dateRef}
-              className={touched.date && errors.date ? "error-field" : ""}
-              onBlur={handleBlur}
+            <DateField
+              register={register}
+              error={errors.date?.message}
+              todayString={todayString}
             />
           </div>
-          {touched.date && errors.date && (
-            <label htmlFor="res-date" className="error" tabIndex={0}>
-              {errors.date}
-            </label>
-          )}
         </div>
 
-        {/* --- Time field: options come from props.availableTimes --- */}
         <div className="form-group">
-          <label htmlFor="time">Time</label>
           <div className="input-icon">
             <Clock size={20} className="icon" />
-            <select
+            <SelectField
               id="time"
-              name="time"
-              value={values.time}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              required
-              className={touched.time && errors.time ? "error-field" : ""}
-              ref={timeRef}
-            >
-              <option value="" disabled hidden>
-                Select time
-              </option>
-              {availableTimes.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
+              label="Time"
+              register={register}
+              validation={{ required: "Please select a time" }}
+              error={errors.time?.message}
+              options={availableTimes.map((t) => ({ value: t, label: t }))}
+              placeholder="Select time"
+            />
           </div>
-          {touched.time && errors.time && (
-            <label htmlFor="time" className="error" tabIndex={0}>
-              {errors.time}
-            </label>
-          )}
         </div>
 
-        {/* --- Number of guests --- */}
         <div className="form-group">
-          <label htmlFor="guests">Number of Guests</label>
           <div className="input-icon">
             <Users size={20} className="icon" />
-            <select
+            <SelectField
               id="guests"
-              name="guests"
-              value={values.guests}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              required
-              className={touched.guests && errors.guests ? "error-field" : ""}
-              ref={guestsRef}
-            >
-              <option value="" disabled hidden>
-                Select number
-              </option>
-              {[...Array(10)].map((_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  {i + 1}
-                </option>
-              ))}
-            </select>
+              label="Guests"
+              icon={Users}
+              register={register}
+              validation={{ required: "Number of guests required" }}
+              error={errors.guests?.message}
+              options={Array.from({ length: 10 }, (_, i) => ({
+                value: i + 1,
+                label: `${i + 1}`,
+              }))}
+              placeholder="Select number"
+            />
           </div>
-          {touched.guests && errors.guests && (
-            <label htmlFor="res-guests" className="error" tabIndex={0}>
-              {errors.guests}
-            </label>
-          )}
         </div>
 
-        {/* --- Occasion field --- */}
         <div className="form-group">
-          <label htmlFor="occasion">Occasion</label>
           <div className="input-icon">
             <Wine size={20} className="icon" />
-            <select
+            <SelectField
               id="occasion"
-              name="occasion"
-              value={values.occasion}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              required
-              className={
-                touched.occasion && errors.occasion ? "error-field" : ""
-              }
-              ref={occasionRef}
-            >
-              <option value="" disabled hidden>
-                Select occasion
-              </option>
-              <option value="Birthday">Birthday</option>
-              <option value="Anniversary">Anniversary</option>
-              <option value="Other">Other</option>
-            </select>
+              label="Occasion"
+              icon={Wine}
+              register={register}
+              validation={{ required: "Please pick an occasion" }}
+              error={errors.occasion?.message}
+              options={[
+                { value: "Birthday", label: "Birthday" },
+                { value: "Anniversary", label: "Anniversary" },
+                { value: "Other", label: "Other" },
+              ]}
+              placeholder="Select occasion"
+            />
           </div>
-          {touched.occasion && errors.occasion && (
-            <label htmlFor="res-occasion" className="error" tabIndex={0}>
-              {errors.occasion}
-            </label>
-          )}
         </div>
       </div>
 
-      {/* --- Seating options --- */}
       <fieldset className="form-group">
         <legend className="label">Seating options</legend>
         <div
@@ -240,55 +151,31 @@ function BookingForm() {
           aria-label="Seating options"
         >
           <label>
-            <input
-              type="radio"
-              name="seating"
-              value="inside"
-              checked={values.seating === "inside"}
-              onChange={handleChange}
-            />{" "}
+            <input type="radio" value="inside" {...register("seating")} />{" "}
             Inside
           </label>
           <label>
-            <input
-              type="radio"
-              name="seating"
-              value="outside"
-              checked={values.seating === "outside"}
-              onChange={handleChange}
-            />{" "}
+            <input type="radio" value="outside" {...register("seating")} />{" "}
             Outside
           </label>
         </div>
       </fieldset>
 
-      {/* --- Additional Comments --- */}
       <div className="form-group">
         <label htmlFor="comments">Additional Comments (Optional)</label>
         <textarea
           id="comments"
-          name="comments"
+          {...register("comments")}
           placeholder="Let us know if you have any special requests..."
-          value={values.comments}
-          onChange={handleChange}
         />
       </div>
 
-      <p className="form-note">
-        You will receive a confirmation email shortly after booking. Please
-        ensure your email is correct so we can send your reservation details.
-      </p>
-
       <div className="button-wrapper">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          aria-label="On Click"
-          className={`cta-button full-width ${!isValid ? "disabled" : ""}`}
-        >
-          Let’s go!
+        <button 
+        type="submit" 
+        className={`cta-button full-width ${!isValid ? "disabled" : ""}`}>
+          Let's go!
         </button>
-
         <button
           type="button"
           className="cancel-button"

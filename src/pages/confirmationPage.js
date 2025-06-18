@@ -11,7 +11,7 @@ function ConfirmationPage() {
   const [confirming, setConfirming] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const data = location.state || {};
+  const {emailSent, ...data} = location.state || {};
 
   const formattedDate = data.date
     ? new Date(data.date).toLocaleDateString("en-GB", {
@@ -52,9 +52,11 @@ function ConfirmationPage() {
         transition={{ duration: 1, ease: "easeOut", delay: 0.3 }}
       >
         <h1>Reservation Confirmed!</h1>
+        {emailSent && (
         <p>
           A confirmation email has been sent to <strong>{data.email}</strong>.
         </p>
+        )}
 
         <div className="summary-box">
           <h3>Summary</h3>

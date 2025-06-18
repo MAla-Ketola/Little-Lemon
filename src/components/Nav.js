@@ -86,7 +86,7 @@ function Nav() {
             </li>
             <li>
               <NavLink
-                to="/login"
+                to="/myBookings"
                 className={({ isActive }) =>
                   isActive ? "active-nav-link" : undefined
                 }

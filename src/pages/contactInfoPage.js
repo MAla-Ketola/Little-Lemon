@@ -1,24 +1,37 @@
-import React, { useEffect, useState, useRef } from "react";
 import "./contactInfoPage.css";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { HiArrowLeft } from "react-icons/hi";
 import { useBooking } from "../context/bookingContext";
-import useFormFields from "../hooks/useFormFields";
+import { useForm } from "react-hook-form";
+import { TextField } from "../components/TextField";
 
-// validator for contact info
-function validateContact(values) {
-  const errors = {};
-  if (!values.firstName) errors.firstName = "First name required";
-  if (!values.lastName) errors.lastName = "Last name required";
-  if (!/\S+@\S+\.\S+/.test(values.email)) errors.email = "Valid email required";
-  if (!values.phone) errors.phone = "Phone number is required.";
-  if (!values.postal) errors.postal = "Postal code is required.";
-  if (!values.day || !values.month)
-    errors.birthday = "Please enter your birthday.";
-  if (!values.agreed) errors.agreed = "You must accept the policy.";
-  return errors;
+const sendConfirmationEmail = (booking) => {
+  return new Promise((resolve) => {
+    //simulate network latency
+    setTimeout(() => resolve(true), 500);
+  })
 }
+
+const CONTACT_VALIDATION = {
+  firstName: { required: "First name is required" },
+  lastName: { required: "Last name is required" },
+  email: {
+    required: "Email is required",
+    pattern: { value: /\S+@\S+\.\S+/, message: "Enter a valid email" },
+  },
+  phone: { required: "Phone number is required" },
+  postal: { required: "Postal code is required" },
+  day: {
+    required: "Day is required",
+    min: { value: 1, message: "Invalid day" },
+  },
+  month: {
+    required: "Month is required",
+    min: { value: 1, message: "Invalid month" },
+  },
+  agreed: { required: "You must accept the policy" },
+};
 
 function ContactInfoPage() {
   const { submitForm } = useBooking();
@@ -26,39 +39,27 @@ function ContactInfoPage() {
   const location = useLocation();
   const booking = location.state || {};
 
-  const {
-    values,
-    errors,
-    touched,
-    isValid,
-    handleChange,
-    handleBlur,
-    setValues,
-    setTouched,
-    validateForm
-  } = useFormFields(
-    {
-      firstName: booking.firstName || "",
-      lastName: booking.lastName || "",
-      email: booking.email || "",
-      phone: booking.phone || "",
-      postal: booking.postal || "",
-      day: booking.day || "",
-      month: booking.month || "",
-      agreed: booking.agreed || false,
-    },
-    validateContact
-  );
+  // defaultValues picks up any existing booking edits
+  const defaultValues = {
+    firstName: booking.firstName || "",
+    lastName: booking.lastName || "",
+    email: booking.email || "",
+    phone: booking.phone || "",
+    postal: booking.postal || "",
+    day: booking.day || "",
+    month: booking.month || "",
+    agreed: booking.agreed || false,
+  };
 
-  const formRef = useRef(null);
-  const firstNameRef = useRef();
-  const lastNameRef = useRef();
-  const emailRef = useRef();
-  const phoneRef = useRef();
-  const postalRef = useRef();
-  const dayRef = useRef();
-  const monthRef = useRef();
-  const agreedRef = useRef();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+    setFocus,
+  } = useForm({
+    mode: "all",
+    defaultValues,
+  });
 
   const formattedDate = booking.date
     ? new Date(booking.date).toLocaleDateString("en-GB", {
@@ -69,34 +70,23 @@ function ContactInfoPage() {
       })
     : "";
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleError = (fieldErrors) => {
+    const firstError = Object.keys(fieldErrors)[0];
+    setFocus(firstError);
+  };
 
-    const validationErrors = validateForm();
-    if (Object.keys(validationErrors).length > 0) {
-            if (validationErrors.firstName) {
-        firstNameRef.current.focus();
-      } else if (validationErrors.lastName) {
-        lastNameRef.current.focus();
-      } else if (validationErrors.email) {
-        emailRef.current.focus();
-      } else if (validationErrors.phone) {
-        phoneRef.current.focus();
-      } else if (validationErrors.postal) {
-        postalRef.current.focus();
-      } else if (validationErrors.day) {
-        dayRef.current.focus();
-      } else if (validationErrors.month) {
-        monthRef.current.focus();
-      } else if (validationErrors.agreed) {
-        agreedRef.current.focus();
-      }
+  const onSubmit = async (vals) => {
+    const saved = submitForm({ ...booking, ...vals });
+    if (!saved) {
+      alert("Sorry—couldn't complete your reservation.");
       return;
     }
 
-    const payload = { ...booking, ...values };
-    const saved = submitForm(payload);
-    if (saved) navigate("/booking/contact/confirmation", { state: saved });
+    const emailSent = await sendConfirmationEmail(saved);
+
+    navigate("/booking/contact/confirmation", {
+      state: { ...saved, emailSent },
+      });
   };
 
   return (
@@ -112,7 +102,7 @@ function ContactInfoPage() {
           </button>
           <p>
             <span /> Little Lemon Chicago
-            <span className="dot" /> {formattedDate} – {booking.time} –{" "}
+            <span className="dot" /> {formattedDate} – {booking.time} – {" "}
             {booking.guests} Guests
           </p>
         </div>
@@ -129,172 +119,108 @@ function ContactInfoPage() {
             <h3>Please complete this form to book your reservation.</h3>
             <form
               className="contact-form"
-              ref={formRef}
-              onSubmit={handleSubmit}
+              onSubmit={handleSubmit(onSubmit, handleError)}
+              noValidate
             >
-              <label>First Name*</label>
-              <input
-                type="text"
-                id="res-firstName"
-                name="firstName"
-                value={values.firstName}
-                ref={firstNameRef}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={
-                  touched.firstName && errors.firstName ? "error-field" : ""
-                }
+              <TextField
+                id="firstName"
+                label="First Name*"
+                register={register}
+                validation={CONTACT_VALIDATION.firstName}
+                error={errors.firstName?.message}
                 placeholder="First Name"
-                required
               />
-              {touched.firstName && errors.firstName && (
-                <label htmlFor="res-firstName" className="error" tabIndex={0}>
-                  {errors.firstName}
-                </label>
-              )}
 
-              <label>Last Name*</label>
-              <input
-                type="text"
-                id="res-lastName"
-                name="lastName"
-                value={values.lastName}
-                ref={lastNameRef}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={
-                  touched.lastName && errors.lastName ? "error-field" : ""
-                }
+              <TextField
+                id="lastName"
+                label="Last Name*"
+                register={register}
+                validation={CONTACT_VALIDATION.lastName}
+                error={errors.lastName?.message}
                 placeholder="Last Name"
-                required
               />
-              {touched.lastName && errors.lastName && (
-                <label htmlFor="res-lastName" className="error" tabIndex={0}>
-                  {errors.lastName}
-                </label>
-              )}
 
-              <label>Email Address*</label>
-              <input
-                type="email"
-                id="res-email"
-                name="email"
-                value={values.email}
-                ref={emailRef}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={touched.email && errors.email ? "error-field" : ""}
-                placeholder="Email Address"
-                required
+              <TextField
+                id="email"
+                label="Email*"
+                register={register}
+                validation={CONTACT_VALIDATION.email}
+                error={errors.email?.message}
+                placeholder="Email"
               />
-              {touched.email && errors.email && (
-                <label htmlFor="res-email" className="error" tabIndex={0}>
-                  {errors.email}
-                </label>
-              )}
 
-              <label>Phone Number*</label>
-              <input
-                type="tel"
-                id="res-phone"
-                name="phone"
-                value={values.phone}
-                ref={phoneRef}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={touched.phone && errors.phone ? "error-field" : ""}
-                placeholder="Phone Number"
-                required
+              <TextField
+                id="phone"
+                label="Phone*"
+                register={register}
+                validation={CONTACT_VALIDATION.phone}
+                error={errors.phone?.message}
+                placeholder="Phone"
               />
-              {touched.phone && errors.phone && (
-                <label htmlFor="res-phone" className="error" tabIndex={0}>
-                  {errors.phone}
-                </label>
-              )}
 
-              <label>Postal Code*</label>
-              <input
-                type="text"
-                name="postal"
-                id="res-postal"
-                value={values.postal}
-                ref={postalRef}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                className={touched.postal && errors.postal ? "error-field" : ""}
-                placeholder="Postal Code"
+              <TextField
+                id="postal"
+                label="Postal Code*"
+                register={register}
+                validation={CONTACT_VALIDATION.postal}
+                error={errors.postal?.message}
+                placeholder="Postal"
               />
-              {touched.postal && errors.postal && (
-                <label htmlFor="res-postal" className="error" tabIndex={0}>
-                  {errors.postal}
-                </label>
-              )}
 
-              <label>Birthday</label>
+              <label>Birthday*</label>
               <div className="birthday-inputs">
-                <input
+                <TextField
+                  id="day"
+                  label=""
                   type="number"
-                  id="res-birthday-day"
-                  name="day"
-                  placeholder="dd"
-                  value={values.day}
-                  ref={dayRef}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  min="1"
-                  max="31"
+                  register={register}
+                  validation={CONTACT_VALIDATION.day}
+                  error={errors.day?.message}
+                  placeholder="DD"
+                  min={1}
+                  max={31}
                 />
-                <input
+
+                <TextField
+                  id="month"
+                  label=""
                   type="number"
-                  id="res-birthday-month"
-                  name="month"
-                  placeholder="mm"
-                  value={values.month}
-                  ref={monthRef}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  min="1"
-                  max="12"
+                  register={register}
+                  validation={CONTACT_VALIDATION.month}
+                  error={errors.month?.message}
+                  placeholder="MM"
+                  min={1}
+                  max={12}
                 />
               </div>
-              {touched.day && touched.month && errors.birthday && (
-                <label htmlFor="res-birthday" className="error" tabIndex={0}>
-                  {errors.birthday}
-                </label>
-              )}
 
-              <label>
-                <input
-                  type="checkbox"
-                  id="res-agreed"
-                  name="agreed"
-                  checked={values.agreed}
-                  ref={agreedRef}
-                  onChange={handleChange}
-                  className={
-                    touched.agreed && errors.agreed ? "error-field" : ""
-                  }
-                  onBlur={handleBlur}
-                  required
-                />
-                I agree to the restaurant’s required policy*
-              </label>
-              {touched.agreed && errors.agreed && (
-                <label htmlFor="res-agreed" className="error" tabIndex={0}>
-                  {errors.agreed}
+              <div className="checkbox">
+                <label className="checkbox-label">
+                  <TextField
+                    id="agreed"
+                    type="checkbox"
+                    register={register}
+                    validation={CONTACT_VALIDATION.agreed}
+                  />
+                  I agree to the <Link to="/policy">terms and policy</Link>*
                 </label>
-              )}
+                {errors.agreed && (
+                  <span role="alert" className="error">
+                    {errors.agreed.message}
+                  </span>
+                )}
+              </div>
 
-              <button
-                type="button"
-                onClick={handleSubmit}
-                aria-label="On Click"
-                className={`cta-button full-width ${
-                  !isValid ? "disabled" : ""
-                }`}
-              >
-                Confirm Reservation
-              </button>
+              <div className="button-wrapper">
+                <button
+                  type="submit"
+                  className={`cta-button full-width ${
+                    !isValid ? "disabled" : ""
+                  }`}
+                >
+                  Confirm Reservation
+                </button>
+              </div>
             </form>
           </div>
 

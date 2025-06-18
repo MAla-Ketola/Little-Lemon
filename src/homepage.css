@@ -114,10 +114,6 @@ header .container {
   padding-bottom: 1rem;
 }
 
-/* .hero-section {
-  max-height: 250px;
-} */
-
 .hero-layout {
   flex-direction: column;
   align-items: center;
@@ -457,7 +453,7 @@ footer img {
   }
 
   .nav-list a:hover {
-    text-decoration: underline;
+    text-decoration: none;
   }
 
   .overlay {
@@ -548,6 +544,15 @@ footer img {
 
   .footer-layout img {
     max-width: 60px;
+  }
+
+    .about-image {
+    /* make it never wider than 200px,
+       but also take up ~80% of the container */
+    width: 80%;
+    max-width: 400px;
+    height: auto;
+    margin-bottom: 1rem; /* optional tweak */
   }
 }
 
